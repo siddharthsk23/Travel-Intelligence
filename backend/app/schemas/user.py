@@ -14,9 +14,18 @@ class UserCreate(UserBase):
 class UserLogin(BaseModel):
     username: str
     password: str
+from pydantic import BaseModel, EmailStr, ConfigDict
 
-class UserResponse(UserBase):
+
+class UserCreate(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+
+
+class UserResponse(BaseModel):
     id: int
-    is_active: bool
+    username: str
+    email: EmailStr
 
     model_config = ConfigDict(from_attributes=True)

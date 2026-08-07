@@ -9,6 +9,7 @@ from app.models.destination import Destination
 from app.models.trip import Trip
 from app.models.itinerary import Itinerary
 from app.routes.itinerary_routes import router as itinerary_router
+from app.routes.planner_routes import router as planner_router
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI(
@@ -20,6 +21,7 @@ app.include_router(user_router)
 app.include_router(destination_router)
 app.include_router(trip_router)
 app.include_router(itinerary_router)
+app.include_router(planner_router)
 
 @app.get("/")
 def root():

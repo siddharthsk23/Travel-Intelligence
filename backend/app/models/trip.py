@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
-
+from sqlalchemy.orm import relationship
 from app.db.base import Base
 
 
@@ -20,3 +20,9 @@ class Trip(Base):
     budget = Column(Integer)
 
     status = Column(String, default="planned")
+
+    itineraries = relationship(
+    "Itinerary",
+    back_populates="trip",
+    cascade="all, delete-orphan"
+)

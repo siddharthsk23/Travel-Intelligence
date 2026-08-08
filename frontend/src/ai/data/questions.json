@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1,
+    "question": "Do you already have a destination in mind?",
+    "options": [
+      "Yes, I know where I want to go.",
+      "Surprise me."
+    ]
+  },
+  {
+    "id": 2,
+    "question": "What type of trip excites you the most?",
+    "options": [
+      "Adventure",
+      "Relaxation",
+      "Culture & Heritage",
+      "Luxury",
+      "Road Trip"
+    ]
+  },
+  {
+    "id": 3,
+    "question": "What budget range are you comfortable with?",
+    "options": [
+      "Budget",
+      "Moderate",
+      "Premium",
+      "Luxury"
+    ]
+  },
+  {
+    "id": 4,
+    "question": "Who are you travelling with?",
+    "options": [
+      "Solo",
+      "Friends",
+      "Family",
+      "Partner"
+    ]
+  },
+  {
+    "id": 5,
+    "question": "Which climate do you enjoy?",
+    "options": [
+      "Cold",
+      "Pleasant",
+      "Warm",
+      "Any"
+    ]
+  },
+  {
+    "id": 6,
+    "question": "What's your preferred mode of transport?",
+    "options": [
+      "Bike",
+      "Car",
+      "Train",
+      "Flight"
+    ]
+  },
+  {
+    "id": 7,
+    "question": "How many days do you usually travel?",
+    "options": [
+      "Weekend",
+      "3–5 Days",
+      "One Week",
+      "More than a Week"
+    ]
+  },
+  {
+    "id": 8,
+    "question": "What's most important to you during a trip?",
+    "options": [
+      "Nature",
+      "Food",
+      "Photography",
+      "History",
+      "Nightlife"
+    ]
+  }
+]

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   FaMotorcycle,
   FaCar,
@@ -8,6 +9,7 @@ import {
 } from "react-icons/fa";
 
 function PlannerForm() {
+  const navigate = useNavigate();
   const [destination, setDestination] = useState("");
   const [days, setDays] = useState(3);
   const [budget, setBudget] = useState(25000);
@@ -256,10 +258,10 @@ function PlannerForm() {
       {/* Button */}
 
       <button
-        onClick={handleGenerate}
+        onClick={() => navigate("/assistant")}
         className="mt-10 bg-cyan-500 hover:bg-cyan-600 px-8 py-3 rounded-xl text-white text-lg font-semibold transition"
-      >
-        Generate Trip
+>
+        Continue with AI
       </button>
 
     </section>

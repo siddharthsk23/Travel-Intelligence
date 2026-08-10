@@ -1,3 +1,8 @@
+from dotenv import load_dotenv
+
+load_dotenv()
+
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from app.db.base import Base
 from app.models.user import User
@@ -10,6 +15,7 @@ from app.models.trip import Trip
 from app.models.itinerary import Itinerary
 from app.routes.itinerary_routes import router as itinerary_router
 from app.routes.planner_routes import router as planner_router
+from app.routes.ai_routes import router as ai_router
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI(
@@ -17,11 +23,19 @@ app = FastAPI(
     version="0.1.0",
     description="Backend API for the Travel Intelligence platform."
 )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(user_router)
 app.include_router(destination_router)
 app.include_router(trip_router)
 app.include_router(itinerary_router)
 app.include_router(planner_router)
+app.include_router(ai_router)
 
 @app.get("/")
 def root():

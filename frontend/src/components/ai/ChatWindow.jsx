@@ -2,9 +2,10 @@ import { useState } from "react";
 import ChatBubble from "./ChatBubble";
 import TypingIndicator from "./TypingIndicator";
 import { getRecommendations } from "../../ai/engine/recommendationEngine";
-import aiResponses from "../../ai/data/aiResponses";
 import conversationFlow from "../../ai/data/conversationFlow";
 import QuestionCard from "./QuestionCard";
+import { buildProfile } from "../../ai/engine/profileEngine";
+import RecommendationScreen from "./RecommendationScreen";
 
 export default function ChatWindow() {
 
@@ -13,11 +14,14 @@ export default function ChatWindow() {
     const [typing, setTyping] = useState(false);
     const [aiMessage, setAiMessage] = useState("");
     const [answers, setAnswers] = useState({});
+    const [conversationHistory, setConversationHistory] = useState([]);
     const [recommendations, setRecommendations] = useState([]);
+    const [profile, setProfile] = useState(null);
+    const [showResults, setShowResults] = useState(false);
 
     const question = conversationFlow[currentQuestion];
 
-    function handleAnswer(answer) {
+    async function handleAnswer(answer) {
 
         setSelectedAnswer(answer);
 
@@ -31,35 +35,172 @@ export default function ChatWindow() {
         setTyping(true);
         setAiMessage("");
 
-        setTimeout(() => {
+        const builtProfile = buildProfile(finalAnswers);
+
+        try {
+
+            const response = await fetch(
+                "http://127.0.0.1:8000/ai/chat",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        profile: builtProfile,
+
+                        safety_concerns: [],
+
+                        comfort_preferences: [],
+
+                        conversation_history: conversationHistory,
+
+                        current_question: question.question,
+
+                        current_answer: answer
+
+                    })
+                }
+            );
+
+            if (!response.ok) {
+
+                throw new Error(
+                    `AI request failed: ${response.status}`
+                );
+
+            }
+
+            const data = await response.json();
+
+            const aiResponse = data.message;
+
+            setAiMessage(aiResponse);
+
+            setConversationHistory(prev => [
+
+                ...prev,
+
+                {
+                    role: "user",
+                    content: answer
+                },
+
+                {
+                    role: "assistant",
+                    content: aiResponse
+                }
+
+            ]);
+
+        } catch (error) {
+
+            console.error(
+                "AI CHAT ERROR:",
+                error
+            );
+
+            setAiMessage(
+                "I'm having trouble connecting to the travel intelligence service. Please try again."
+            );
+
+        } finally {
 
             setTyping(false);
 
-            setAiMessage(
-                aiResponses[question.id]?.[answer] ??
-                "Interesting choice."
-            );
+        }
 
-        }, 1200);
+        /*
+         * Determine the next question.
+         */
 
-        if (currentQuestion < conversationFlow.length - 1) {
+        let nextQuestion = currentQuestion + 1;
+
+        /*
+         * If the user chose "Surprise me",
+         * skip the destination text input.
+         *
+         * destination
+         *     ↓
+         * Surprise me
+         *     ↓
+         * style
+         */
+
+        if (
+            question.id === "destination" &&
+            answer === "Surprise me."
+        ) {
+
+            nextQuestion = currentQuestion + 2;
+
+        }
+
+        /*
+         * Continue to the next question.
+         */
+
+        if (nextQuestion < conversationFlow.length) {
 
             setTimeout(() => {
 
-                setCurrentQuestion(prev => prev + 1);
+                setCurrentQuestion(nextQuestion);
+
                 setSelectedAnswer(null);
+
                 setAiMessage("");
 
-            }, 2500);
+            }, 3000);
 
         } else {
 
-            console.log("Conversation Finished");
-            const recommendations = getRecommendations(finalAnswers);
+            /*
+             * Final question completed.
+             * Generate recommendations.
+             */
 
-            setRecommendations(recommendations);
+            const finalRecommendations =
+                getRecommendations(builtProfile);
+
+            console.log(
+                "FINAL PROFILE:",
+                builtProfile
+            );
+
+            console.log(
+                "FINAL RECOMMENDATIONS:",
+                finalRecommendations
+            );
+
+            setProfile(builtProfile);
+
+            setRecommendations(
+                finalRecommendations
+            );
+
+            setTimeout(() => {
+
+                setShowResults(true);
+
+            }, 3000);
 
         }
+
+    }
+
+    if (showResults) {
+
+        return (
+
+            <RecommendationScreen
+                profile={profile}
+                recommendations={recommendations}
+            />
+
+        );
 
     }
 

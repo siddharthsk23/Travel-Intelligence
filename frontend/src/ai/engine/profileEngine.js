@@ -1,27 +1,28 @@
-export function buildTravelProfile(answers) {
+export function buildProfile(answers) {
+
+    const destinationKnown =
+        answers.destination ===
+        "Yes, I know where I want to go.";
 
     return {
 
-        destinationMode: answers.destination,
+        destinationKnown,
 
-        travelStyle: answers.style,
+        destination:
+            answers.destinationName || null,
 
-        mustHave: answers.mustHave,
+        travelStyle:
+            answers.style || null,
 
-        tripPace: answers.pace,
+        tripPace:
+            answers.pace || null,
 
-        priority: answers.priority,
+        priority:
+            answers.priority || null,
 
-        confidence: calculateConfidence(answers)
+        mustHave:
+            answers.mustHave || null
 
     };
-
-}
-
-function calculateConfidence(answers) {
-
-    const answered = Object.values(answers).filter(Boolean).length;
-
-    return answered / 5;
 
 }

@@ -1,100 +1,516 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+import AIBootScreen from "./AIBootScreen";
 import ChatBubble from "./ChatBubble";
 import TypingIndicator from "./TypingIndicator";
-import { getRecommendations } from "../../ai/engine/recommendationEngine";
-import conversationFlow from "../../ai/data/conversationFlow";
 import QuestionCard from "./QuestionCard";
-import { buildProfile } from "../../ai/engine/profileEngine";
 import RecommendationScreen from "./RecommendationScreen";
+
+import { getRecommendations } from "../../ai/engine/recommendationEngine";
+import { buildProfile } from "../../ai/engine/profileEngine";
+
+import {
+    travelerProfileFlow,
+    tripFlow
+} from "../../ai/data/conversationFlow";
+
+const API_BASE = "http://127.0.0.1:8000";
 
 export default function ChatWindow() {
 
-    const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [selectedAnswer, setSelectedAnswer] = useState(null);
-    const [typing, setTyping] = useState(false);
-    const [aiMessage, setAiMessage] = useState("");
-    const [answers, setAnswers] = useState({});
-    const [conversationHistory, setConversationHistory] = useState([]);
-    const [recommendations, setRecommendations] = useState([]);
-    const [profile, setProfile] = useState(null);
-    const [showResults, setShowResults] = useState(false);
+    const [stage, setStage] = useState("loading");
 
-    const question = conversationFlow[currentQuestion];
+    const [isReturningUser, setIsReturningUser] =
+        useState(false);
 
-    async function handleAnswer(answer) {
+    const [currentQuestion, setCurrentQuestion] =
+        useState(0);
 
-        setSelectedAnswer(answer);
+    const [selectedAnswer, setSelectedAnswer] =
+        useState(null);
 
-        const finalAnswers = {
-            ...answers,
-            [question.id]: answer
-        };
+    const [typing, setTyping] =
+        useState(false);
 
-        setAnswers(finalAnswers);
+    const [aiMessage, setAiMessage] =
+        useState("");
 
-        setTyping(true);
-        setAiMessage("");
+    const [answers, setAnswers] =
+        useState({});
 
-        const builtProfile = buildProfile(finalAnswers);
+    const [tripAnswers, setTripAnswers] =
+        useState({});
+
+    const [conversationHistory, setConversationHistory] =
+        useState([]);
+
+    const [travelerProfile, setTravelerProfile] =
+        useState(null);
+
+    const [travelerId, setTravelerId] =
+        useState(null);
+
+    const [recommendations, setRecommendations] =
+        useState([]);
+
+    const [profile, setProfile] =
+        useState(null);
+
+    const [showResults, setShowResults] =
+        useState(false);
+
+
+    const activeFlow =
+        stage === "traveler-profile"
+            ? travelerProfileFlow
+            : tripFlow;
+
+    const question =
+        activeFlow[currentQuestion];
+
+
+    /*
+     * --------------------------------------------------
+     * INITIALIZE TRAVELER
+     * --------------------------------------------------
+     */
+
+    useEffect(() => {
+
+    async function initializeTraveler() {
+
+        let id = localStorage.getItem(
+            "travel_intelligence_traveler_id"
+        );
+
+        /*
+         * =========================================
+         * NEW USER
+         * =========================================
+         */
+
+        if (!id) {
+
+            id = crypto.randomUUID();
+
+            localStorage.setItem(
+                "travel_intelligence_traveler_id",
+                id
+            );
+
+            console.log(
+                "NEW TRAVELER:",
+                id
+            );
+
+            setTravelerId(id);
+
+            setIsReturningUser(false);
+
+            setStage("traveler-profile");
+
+            return;
+        }
+
+
+        /*
+         * =========================================
+         * EXISTING TRAVELER
+         * =========================================
+         */
+
+        setTravelerId(id);
+        setIsReturningUser(true);
+
+        console.log(
+            "EXISTING TRAVELER:",
+            id
+        );
+
 
         try {
 
             const response = await fetch(
-                "http://127.0.0.1:8000/ai/chat",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
-                    body: JSON.stringify({
-
-                        profile: builtProfile,
-
-                        safety_concerns: [],
-
-                        comfort_preferences: [],
-
-                        conversation_history: conversationHistory,
-
-                        current_question: question.question,
-
-                        current_answer: answer
-
-                    })
-                }
+                `${API_BASE}/traveler-profile/${id}`
             );
+
+
+            /*
+             * No saved profile.
+             * Treat as new/uninitialized traveler.
+             */
+
+            if (response.status === 404) {
+
+                console.log(
+                    "NO SAVED PROFILE"
+                );
+
+                setTravelerProfile(null);
+
+                setIsReturningUser(false);
+
+                return;
+            }
+
 
             if (!response.ok) {
 
                 throw new Error(
-                    `AI request failed: ${response.status}`
+                    `Profile request failed: ${response.status}`
                 );
 
             }
 
-            const data = await response.json();
 
-            const aiResponse = data.message;
+            const data =
+                await response.json();
 
-            setAiMessage(aiResponse);
 
-            setConversationHistory(prev => [
+            console.log(
+                "RETURNING TRAVELER:",
+                data
+            );
 
-                ...prev,
 
+            setTravelerProfile(data);
+
+            setIsReturningUser(true);
+
+
+        } catch (error) {
+
+            console.error(
+                "PROFILE LOAD ERROR:",
+                error
+            );
+
+            /*
+             * Don't block the user if profile
+             * loading fails.
+             */
+
+            setTravelerProfile(null);
+
+            setIsReturningUser(false);
+
+        }
+
+    }
+
+
+    initializeTraveler();
+
+}, []);
+
+
+    /*
+     * --------------------------------------------------
+     * CURRENT QUESTION
+     * --------------------------------------------------
+     */
+
+
+    /*
+     * --------------------------------------------------
+     * SAVE PERSISTENT TRAVELER PROFILE
+     * --------------------------------------------------
+     */
+
+    async function saveTravelerProfile(
+        profileAnswers
+    ) {
+
+        if (!travelerId) {
+
+            console.error(
+                "TRAVELER ID MISSING"
+            );
+
+            return null;
+        }
+
+
+        /*
+         * Convert text input such as:
+         *
+         * "Peanuts, shellfish"
+         *
+         * into:
+         *
+         * ["Peanuts", "shellfish"]
+         */
+
+        function parseList(value) {
+
+            if (!value) {
+                return [];
+            }
+
+
+            if (
+                value.trim().toLowerCase() ===
+                "none"
+            ) {
+
+                return [];
+
+            }
+
+
+            return value
+                .split(",")
+                .map(item => item.trim())
+                .filter(Boolean);
+
+        }
+
+
+        const persistentProfile = {
+
+            traveler_id: travelerId,
+
+            travel_style:
+                profileAnswers.style || null,
+
+            preferred_pace:
+                profileAnswers.pace || null,
+
+            interests:
+                profileAnswers.interests
+                    ? [profileAnswers.interests]
+                    : [],
+
+            transport_preference:
+                profileAnswers.transport || null,
+
+            food_preferences:
+                profileAnswers.food
+                    ? [profileAnswers.food]
+                    : [],
+
+            allergies:
+                parseList(
+                    profileAnswers.allergies
+                ),
+
+            phobias:
+                parseList(
+                    profileAnswers.phobias
+                )
+
+        };
+
+
+        console.log(
+            "SAVING TRAVELER PROFILE:",
+            persistentProfile
+        );
+
+
+        try {
+
+            const response = await fetch(
+                `${API_BASE}/traveler-profile`,
                 {
-                    role: "user",
-                    content: answer
-                },
+                    method: "POST",
 
-                {
-                    role: "assistant",
-                    content: aiResponse
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify(
+                        persistentProfile
+                    )
                 }
+            );
 
-            ]);
+
+            if (!response.ok) {
+
+                const errorBody =
+                    await response.text();
+
+                console.error(
+                    "PROFILE SAVE BACKEND ERROR:",
+                    response.status,
+                    errorBody
+                );
+
+                throw new Error(
+                    `Profile save failed: ${response.status} - ${errorBody}`
+                );
+
+            }
+
+
+            const savedProfile =
+                await response.json();
+
+
+            console.log(
+                "TRAVELER PROFILE SAVED:",
+                savedProfile
+            );
+
+
+            setTravelerProfile(
+                savedProfile
+            );
+
+
+            return savedProfile;
+
+
+        } catch (error) {
+
+            console.error(
+                "PROFILE SAVE ERROR:",
+                error
+            );
+
+            return null;
+
+        }
+
+    }
+
+
+    /*
+     * --------------------------------------------------
+     * AI RESPONSE
+     * --------------------------------------------------
+     */
+
+    async function getAIResponse(
+        answer,
+        currentProfile
+    ) {
+
+        const requestPayload = {
+
+            profile: {
+                ...currentProfile,
+
+                traveler_id:
+                    travelerId
+            },
+
+            safety_concerns:
+                currentProfile?.allergies ||
+                [],
+
+            comfort_preferences:
+                currentProfile?.phobias ||
+                [],
+
+            conversation_history:
+                conversationHistory,
+
+            current_question:
+                question.question,
+
+            current_answer:
+                answer
+
+        };
+
+
+        /*
+         * Log exactly what is being sent
+         * to FastAPI.
+         */
+        console.log(
+            "AI REQUEST PAYLOAD:",
+            requestPayload
+        );
+
+
+        try {
+
+            const response = await fetch(
+                `${API_BASE}/ai/chat`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify(
+                        requestPayload
+                    )
+
+                }
+            );
+
+
+            /*
+             * IMPORTANT:
+             *
+             * Read the backend response body when
+             * an error occurs so we can see the
+             * actual FastAPI/Pydantic error.
+             */
+            if (!response.ok) {
+
+                const errorBody =
+                    await response.text();
+
+
+                console.error(
+                    "AI BACKEND ERROR:",
+                    response.status,
+                    errorBody
+                );
+
+
+                throw new Error(
+                    `AI request failed: ${response.status} - ${errorBody}`
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            const aiResponse =
+                data.message;
+
+
+            console.log(
+                "AI RESPONSE:",
+                aiResponse
+            );
+
+
+            setAiMessage(
+                aiResponse
+            );
+
+
+            setConversationHistory(
+                previous => [
+
+                    ...previous,
+
+                    {
+                        role: "user",
+                        content: answer
+                    },
+
+                    {
+                        role: "assistant",
+                        content: aiResponse
+                    }
+
+                ]
+            );
+
 
         } catch (error) {
 
@@ -103,106 +519,395 @@ export default function ChatWindow() {
                 error
             );
 
+
             setAiMessage(
                 "I'm having trouble connecting to the travel intelligence service. Please try again."
             );
 
-        } finally {
-
-            setTyping(false);
-
         }
 
-        /*
-         * Determine the next question.
-         */
+    }
 
-        let nextQuestion = currentQuestion + 1;
+
+    /*
+     * --------------------------------------------------
+     * HANDLE ANSWER
+     * --------------------------------------------------
+     */
+
+    async function handleAnswer(answer) {
+
+        setSelectedAnswer(answer);
+
+        setTyping(true);
+
+        setAiMessage("");
+
 
         /*
-         * If the user chose "Surprise me",
-         * skip the destination text input.
-         *
-         * destination
-         *     ↓
-         * Surprise me
-         *     ↓
-         * style
+         * ==============================================
+         * TRAVELER PROFILE STAGE
+         * ==============================================
          */
 
         if (
-            question.id === "destination" &&
-            answer === "Surprise me."
+            stage ===
+            "traveler-profile"
         ) {
 
-            nextQuestion = currentQuestion + 2;
+            const updatedProfileAnswers = {
+
+                ...answers,
+
+                [question.id]:
+                    answer
+
+            };
+
+
+            setAnswers(
+                updatedProfileAnswers
+            );
+
+
+            /*
+             * Let the AI react to the answer.
+             */
+            await getAIResponse(
+                answer,
+                updatedProfileAnswers
+            );
+
+
+            const nextQuestion =
+                currentQuestion + 1;
+
+
+            /*
+             * More profile questions remain.
+             */
+            if (
+                nextQuestion <
+                travelerProfileFlow.length
+            ) {
+
+                setTimeout(() => {
+
+                    setCurrentQuestion(
+                        nextQuestion
+                    );
+
+                    setSelectedAnswer(
+                        null
+                    );
+
+                    setAiMessage(
+                        ""
+                    );
+
+                }, 2500);
+
+
+                setTyping(false);
+
+                return;
+
+            }
+
+
+            /*
+             * ==========================================
+             * PROFILE COMPLETE
+             * ==========================================
+             */
+
+            await saveTravelerProfile(
+                updatedProfileAnswers
+            );
+
+
+            setTyping(false);
+
+
+            /*
+             * Move into the current-trip flow.
+             */
+            setTimeout(() => {
+
+                setStage("trip");
+
+                setCurrentQuestion(0);
+
+                setAnswers({});
+
+                setSelectedAnswer(
+                    null
+                );
+
+                setAiMessage(
+                    "I've got your travel preferences. Now let's plan your trip."
+                );
+
+            }, 2500);
+
+
+            return;
 
         }
 
+
         /*
-         * Continue to the next question.
+         * ==============================================
+         * TRIP STAGE
+         * ==============================================
          */
 
-        if (nextQuestion < conversationFlow.length) {
+        const updatedTripAnswers = {
+
+            ...tripAnswers,
+
+            [question.id]:
+                answer
+
+        };
+
+
+        setTripAnswers(
+            updatedTripAnswers
+        );
+
+
+        /*
+         * Combine persistent traveler preferences
+         * with current trip preferences for the AI.
+         */
+        const aiProfile = {
+
+            ...travelerProfile,
+
+            destination:
+                updatedTripAnswers.destinationName ||
+                null,
+
+            priority:
+                updatedTripAnswers.priority ||
+                null,
+
+            mustHave:
+                updatedTripAnswers.mustHave ||
+                null
+
+        };
+
+
+        await getAIResponse(
+            answer,
+            aiProfile
+        );
+
+
+        /*
+         * Handle "Surprise me."
+         */
+        let nextQuestion =
+            currentQuestion + 1;
+
+
+        if (
+            question.id ===
+            "destination" &&
+            answer ===
+            "Surprise me."
+        ) {
+
+            /*
+             * Skip destinationName.
+             */
+            nextQuestion =
+                currentQuestion + 2;
+
+        }
+
+
+        /*
+         * More trip questions.
+         */
+        if (
+            nextQuestion <
+            tripFlow.length
+        ) {
 
             setTimeout(() => {
 
-                setCurrentQuestion(nextQuestion);
+                setCurrentQuestion(
+                    nextQuestion
+                );
 
-                setSelectedAnswer(null);
+                setSelectedAnswer(
+                    null
+                );
 
-                setAiMessage("");
+                setAiMessage(
+                    ""
+                );
 
-            }, 3000);
+            }, 2500);
 
-        } else {
 
-            /*
-             * Final question completed.
-             * Generate recommendations.
-             */
+            setTyping(false);
 
-            const finalRecommendations =
-                getRecommendations(builtProfile);
+            return;
 
-            console.log(
-                "FINAL PROFILE:",
+        }
+
+
+        /*
+         * ==========================================
+         * TRIP COMPLETE
+         * ==========================================
+         */
+
+        /*
+         * The recommendation engine expects:
+         *
+         * travelStyle
+         * tripPace
+         * priority
+         * mustHave
+         *
+         * Combine persistent preferences
+         * with current trip answers.
+         */
+
+        const recommendationInput = {
+
+            ...updatedTripAnswers,
+
+            style:
+                travelerProfile?.travel_style ||
+                null,
+
+            pace:
+                travelerProfile?.preferred_pace ||
+                null
+
+        };
+
+
+        const builtProfile =
+            buildProfile(
+                recommendationInput
+            );
+
+
+        /*
+         * Add destination explicitly.
+         */
+        builtProfile.destination =
+            updatedTripAnswers.destinationName ||
+            null;
+
+
+        console.log(
+            "FINAL TRAVELER PROFILE:",
+            travelerProfile
+        );
+
+
+        console.log(
+            "FINAL TRIP PROFILE:",
+            builtProfile
+        );
+
+
+        const finalRecommendations =
+            getRecommendations(
                 builtProfile
             );
 
-            console.log(
-                "FINAL RECOMMENDATIONS:",
-                finalRecommendations
-            );
 
-            setProfile(builtProfile);
-
-            setRecommendations(
-                finalRecommendations
-            );
-
-            setTimeout(() => {
-
-                setShowResults(true);
-
-            }, 3000);
-
-        }
-
-    }
-
-    if (showResults) {
-
-        return (
-
-            <RecommendationScreen
-                profile={profile}
-                recommendations={recommendations}
-            />
-
+        console.log(
+            "FINAL RECOMMENDATIONS:",
+            finalRecommendations
         );
 
+
+        setProfile(
+            builtProfile
+        );
+
+
+        setRecommendations(
+            finalRecommendations
+        );
+
+
+        setTyping(false);
+
+
+        setTimeout(() => {
+
+            setStage(
+                "results"
+            );
+
+        }, 2500);
+
     }
+
+
+    /*
+     * --------------------------------------------------
+     * LOADING
+     * --------------------------------------------------
+     */
+
+    if (stage === "loading") {
+
+    return (
+
+        <AIBootScreen
+            isReturningUser={isReturningUser}
+            onComplete={() => {
+
+            setCurrentQuestion(0);
+            setSelectedAnswer(null);
+            setAiMessage("");
+
+            if (isReturningUser) {
+                setStage("trip");
+            } else {
+                setStage("traveler-profile");
+            }
+
+}}
+        />
+
+    );
+}
+
+
+    /*
+     * --------------------------------------------------
+     * RESULTS
+     * --------------------------------------------------
+     */
+
+    if (stage === "results") {
+    return (
+        <RecommendationScreen
+            profile={profile}
+            recommendations={recommendations}
+        />
+    );
+}
+
+
+    /*
+     * --------------------------------------------------
+     * MAIN UI
+     * --------------------------------------------------
+     */
 
     return (
 

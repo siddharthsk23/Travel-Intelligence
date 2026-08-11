@@ -1,4 +1,86 @@
-const conversationFlow = [
+const travelerProfileFlow = [
+
+    {
+        id: "style",
+        question: "What kind of traveler are you?",
+        options: [
+            "Adventure",
+            "Luxury",
+            "Nature",
+            "History",
+            "Photography",
+            "Food",
+            "Road Trip"
+        ]
+    },
+
+    {
+        id: "pace",
+        question: "What's your preferred travel pace?",
+        options: [
+            "Relaxed",
+            "Balanced",
+            "Packed"
+        ]
+    },
+
+    {
+        id: "interests",
+        question: "What interests you the most while travelling?",
+        options: [
+            "Nature",
+            "History",
+            "Adventure",
+            "Photography",
+            "Food",
+            "Road Trips",
+            "Nightlife"
+        ]
+    },
+
+    {
+        id: "transport",
+        question: "How do you usually prefer to travel?",
+        options: [
+            "My own car",
+            "My own bike",
+            "Public transport",
+            "Flights",
+            "Mix of transport"
+        ]
+    },
+
+    {
+        id: "food",
+        question: "What are your food preferences?",
+        options: [
+            "No restrictions",
+            "Vegetarian",
+            "Vegan",
+            "Jain",
+            "Non-vegetarian",
+            "Local food enthusiast"
+        ]
+    },
+
+    {
+        id: "allergies",
+        question: "Do you have any food or other allergies I should know about?",
+        type: "text",
+        placeholder: "Type an allergy, or enter 'None'..."
+    },
+
+    {
+        id: "phobias",
+        question: "Are there any phobias, physical limitations, or experiences you want me to avoid?",
+        type: "text",
+        placeholder: "Type them here, or enter 'None'..."
+    }
+
+];
+
+
+const tripFlow = [
 
     {
         id: "destination",
@@ -17,32 +99,8 @@ const conversationFlow = [
     },
 
     {
-        id: "style",
-        question: "What kind of traveler are you?",
-        options: [
-            "Adventure",
-            "Luxury",
-            "Nature",
-            "History",
-            "Photography",
-            "Food",
-            "Road Trip"
-        ]
-    },
-
-    {
-        id: "pace",
-        question: "How busy do you want your trip to be?",
-        options: [
-            "Relaxed",
-            "Balanced",
-            "Packed"
-        ]
-    },
-
-    {
         id: "priority",
-        question: "What matters the most?",
+        question: "What matters the most for this trip?",
         options: [
             "Budget",
             "Experience",
@@ -66,4 +124,10 @@ const conversationFlow = [
 
 ];
 
-export default conversationFlow;
+
+export {
+    travelerProfileFlow,
+    tripFlow
+};
+
+export default tripFlow;

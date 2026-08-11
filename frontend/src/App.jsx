@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import AIAssistant from "./pages/AIAssistant";
 import Dashboard from "./pages/Dashboard";
+import Planner from "./pages/Planner";
+import Trip from "./pages/Trip";
 
 function App() {
     return (
@@ -22,6 +24,16 @@ function App() {
                 <Route
                     path="/dashboard"
                     element={<Dashboard />}
+                />
+
+                <Route
+                    path="/planner"
+                    element={<Planner />}
+                />
+
+                <Route
+                    path="/trip"
+                    element={<Trip />}
                 />
 
             </Routes>

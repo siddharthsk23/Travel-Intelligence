@@ -3,6 +3,7 @@ import { createContext, useState } from "react";
 export const PlannerContext = createContext();
 
 export function PlannerProvider({ children }) {
+  const [source, setSource] = useState("");
   const [destination, setDestination] = useState("");
   const [days, setDays] = useState(3);
   const [budget, setBudget] = useState(25000);
@@ -16,6 +17,9 @@ export function PlannerProvider({ children }) {
   return (
     <PlannerContext.Provider
       value={{
+        source,
+        setSource,
+
         destination,
         setDestination,
 

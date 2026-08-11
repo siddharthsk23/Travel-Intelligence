@@ -47,4 +47,5 @@ class PlannerResponse(BaseModel):
     destination: str
     trip_name: str
     estimated_cost: float
+    cost_note: str | None = None
     itinerary: List[dict]

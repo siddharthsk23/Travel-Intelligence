@@ -118,16 +118,16 @@ export default function Planner() {
                     {/* Starting location */}
                     <div>
                         <label className="block text-xl font-semibold mb-3">
-                            Starting location
+                            Where are you starting from?
                         </label>
                         <p className="text-gray-400 mb-3">
-                            Where are you starting your journey from?
+                            Enter the city or location where your journey begins.
                         </p>
                         <input
                             type="text"
                             value={source}
                             onChange={(e) => setSource(e.target.value)}
-                            placeholder="e.g. Bengaluru"
+                            placeholder="Enter starting location..."
                             className="w-full bg-[#1b2942] border border-gray-600 rounded-xl px-5 py-4 text-white outline-none focus:border-cyan-400"
                         />
                     </div>

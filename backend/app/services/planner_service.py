@@ -136,5 +136,6 @@ def generate_trip_plan(request: PlannerRequest):
         "destination": request.destination,
         "trip_name": f"{request.source} → {request.destination} Trip",
         "estimated_cost": _estimate_cost(request.destination, request.days, request.budget, request.transport, interests),
+        "cost_note": "Estimated cost is based on the existing destination/day/budget/transport model and is not source-to-destination travel cost yet.",
         "itinerary": itinerary,
     }

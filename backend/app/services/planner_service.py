@@ -4,14 +4,46 @@ from app.services.route_service import analyze_route
 
 
 ACTIVITY_POOLS = {
-    "adventure": {"morning": ["Start with a guided trail ride around {destination}", "Take an early mountain pass route near {destination}", "Try a beginner-friendly adventure activity in {destination}"], "afternoon": ["Visit a high-altitude viewpoint and nearby villages in {destination}", "Explore rugged backroads and scenic stops around {destination}", "Spend time at an adventure base camp near {destination}"], "evening": ["Unwind with a bonfire-style local dinner in {destination}", "Review the route and prepare for the next day's ride in {destination}", "Relax at a traveler cafe and swap route stories in {destination}"]},
-    "nature": {"morning": ["Watch sunrise over the natural landscapes of {destination}", "Walk through a quiet valley or lakeside trail in {destination}", "Visit a peaceful nature viewpoint in {destination}"], "afternoon": ["Spend the afternoon by a lake, meadow or river near {destination}", "Explore scenic villages surrounded by nature in {destination}", "Take a slow landscape drive through {destination}"], "evening": ["Enjoy sunset from a calm viewpoint in {destination}", "Have dinner with views of the surrounding landscape in {destination}", "Take a relaxed evening walk under clear skies in {destination}"]},
-    "photography": {"morning": ["Capture golden-hour shots around {destination}", "Photograph local streets and morning life in {destination}", "Visit a viewpoint for wide landscape photos of {destination}"], "afternoon": ["Shoot architecture, markets and road scenes in {destination}", "Find colorful village frames and portrait spots in {destination}", "Visit a scenic landmark for afternoon photography in {destination}"], "evening": ["Capture sunset and blue-hour scenes in {destination}", "Try night-sky or low-light photography around {destination}", "Review photos over dinner in {destination}"]},
-    "history": {"morning": ["Visit an important monastery, fort or heritage site in {destination}", "Explore an old settlement and its stories in {destination}", "Start with a local cultural landmark in {destination}"], "afternoon": ["Tour a museum or heritage center in {destination}", "Meet local guides and learn regional history in {destination}", "Visit traditional craft or cultural spaces in {destination}"], "evening": ["Attend a cultural performance or local gathering in {destination}", "Try a traditional dinner while learning local stories in {destination}", "Walk through a historic market area in {destination}"]},
-    "food": {"morning": ["Begin with a local breakfast crawl in {destination}", "Visit a morning market for regional flavors in {destination}", "Try a popular local tea and snack spot in {destination}"], "afternoon": ["Have lunch at a well-known local eatery in {destination}", "Join a simple cooking or tasting experience in {destination}", "Explore cafes and regional dishes around {destination}"], "evening": ["End with a local dinner trail in {destination}", "Try street food or homestyle dishes in {destination}", "Visit a relaxed cafe for dessert and tea in {destination}"]},
-    "road trips": {"morning": ["Start with a scenic road stretch around {destination}", "Take an early drive through a memorable route near {destination}", "Begin with roadside viewpoints and short stops in {destination}"], "afternoon": ["Continue through local routes with lunch stops in {destination}", "Visit viewpoints and roadside villages around {destination}", "Spend the afternoon on an easy loop route near {destination}"], "evening": ["Park up for sunset and dinner in {destination}", "Review the route and rest after the day's travel in {destination}", "End with a relaxed roadside cafe stop in {destination}"]},
-    "nightlife": {"morning": ["Start slow with a relaxed neighborhood walk in {destination}", "Visit a popular daytime hangout in {destination}", "Explore local cafes and easy sights in {destination}"], "afternoon": ["Keep the afternoon light with markets and casual food in {destination}", "Explore social spots and local shopping areas in {destination}", "Rest before an active evening in {destination}"], "evening": ["Visit a lively local cafe or music spot in {destination}", "Spend the evening at a popular hangout area in {destination}", "Try a relaxed dinner spot with a good evening atmosphere in {destination}"]},
-    "general": {"morning": ["Explore a signature area of {destination}", "Start with a relaxed orientation walk in {destination}", "Visit a popular local landmark in {destination}", "Begin with a slow-paced local discovery walk in {destination}"], "afternoon": ["Enjoy lunch and sightseeing in a different part of {destination}", "Take a scenic route with short stops around {destination}", "Visit local markets and viewpoints in {destination}", "Spend time at an easy cultural or nature stop in {destination}"], "evening": ["Enjoy local food and a relaxed evening in {destination}", "Watch sunset from a nearby viewpoint in {destination}", "Spend the evening shopping and resting in {destination}", "Close the day with a quiet dinner and short walk in {destination}"]},
+    "adventure": {
+        "morning": ["Start with a guided trail ride around {destination}", "Take an early mountain pass route near {destination}", "Try a beginner-friendly adventure activity in {destination}"],
+        "afternoon": ["Visit a high-altitude viewpoint and nearby villages in {destination}", "Explore rugged backroads and scenic stops around {destination}", "Spend time at an adventure base camp near {destination}"],
+        "evening": ["Unwind with a bonfire-style local dinner in {destination}", "Review the route and prepare for the next day's ride in {destination}", "Relax at a traveler cafe and swap route stories in {destination}"],
+    },
+    "nature": {
+        "morning": ["Watch sunrise over the natural landscapes of {destination}", "Walk through a quiet valley or lakeside trail in {destination}", "Visit a peaceful nature viewpoint in {destination}"],
+        "afternoon": ["Spend the afternoon by a lake, meadow or river near {destination}", "Explore scenic villages surrounded by nature in {destination}", "Take a slow landscape drive through {destination}"],
+        "evening": ["Enjoy sunset from a calm viewpoint in {destination}", "Have dinner with views of the surrounding landscape in {destination}", "Take a relaxed evening walk under clear skies in {destination}"],
+    },
+    "photography": {
+        "morning": ["Capture golden-hour shots around {destination}", "Photograph local streets and morning life in {destination}", "Visit a viewpoint for wide landscape photos of {destination}"],
+        "afternoon": ["Shoot architecture, markets and road scenes in {destination}", "Find colorful village frames and portrait spots in {destination}", "Visit a scenic landmark for afternoon photography in {destination}"],
+        "evening": ["Capture sunset and blue-hour scenes in {destination}", "Try night-sky or low-light photography around {destination}", "Review photos over dinner in {destination}"],
+    },
+    "history": {
+        "morning": ["Visit an important monastery, fort or heritage site in {destination}", "Explore an old settlement and its stories in {destination}", "Start with a local cultural landmark in {destination}"],
+        "afternoon": ["Tour a museum or heritage center in {destination}", "Meet local guides and learn regional history in {destination}", "Visit traditional craft or cultural spaces in {destination}"],
+        "evening": ["Attend a cultural performance or local gathering in {destination}", "Try a traditional dinner while learning local stories in {destination}", "Walk through a historic market area in {destination}"],
+    },
+    "food": {
+        "morning": ["Begin with a local breakfast crawl in {destination}", "Visit a morning market for regional flavors in {destination}", "Try a popular local tea and snack spot in {destination}"],
+        "afternoon": ["Have lunch at a well-known local eatery in {destination}", "Join a simple cooking or tasting experience in {destination}", "Explore cafes and regional dishes around {destination}"],
+        "evening": ["End with a local dinner trail in {destination}", "Try street food or homestyle dishes in {destination}", "Visit a relaxed cafe for dessert and tea in {destination}"],
+    },
+    "road trips": {
+        "morning": ["Start with a scenic road stretch around {destination}", "Take an early drive through a memorable route near {destination}", "Begin with roadside viewpoints and short stops in {destination}"],
+        "afternoon": ["Continue through local routes with lunch stops in {destination}", "Visit viewpoints and roadside villages around {destination}", "Spend the afternoon on an easy loop route near {destination}"],
+        "evening": ["Park up for sunset and dinner in {destination}", "Review the route and rest after the day's travel in {destination}", "End with a relaxed roadside cafe stop in {destination}"],
+    },
+    "nightlife": {
+        "morning": ["Start slow with a relaxed neighborhood walk in {destination}", "Visit a popular daytime hangout in {destination}", "Explore local cafes and easy sights in {destination}"],
+        "afternoon": ["Keep the afternoon light with markets and casual food in {destination}", "Explore social spots and local shopping areas in {destination}", "Rest before an active evening in {destination}"],
+        "evening": ["Visit a lively local cafe or music spot in {destination}", "Spend the evening at a popular hangout area in {destination}", "Try a relaxed dinner spot with a good evening atmosphere in {destination}"],
+    },
+    "general": {
+        "morning": ["Explore a signature area of {destination}", "Start with a relaxed orientation walk in {destination}", "Visit a popular local landmark in {destination}", "Begin with a slow-paced local discovery walk in {destination}"],
+        "afternoon": ["Enjoy lunch and sightseeing in a different part of {destination}", "Take a scenic route with short stops around {destination}", "Visit local markets and viewpoints in {destination}", "Spend time at an easy cultural or nature stop in {destination}"],
+        "evening": ["Enjoy local food and a relaxed evening in {destination}", "Watch sunset from a nearby viewpoint in {destination}", "Spend the evening shopping and resting in {destination}", "Close the day with a quiet dinner and short walk in {destination}"],
+    },
 }
 
 TRANSPORT_ACTIVITIES = {

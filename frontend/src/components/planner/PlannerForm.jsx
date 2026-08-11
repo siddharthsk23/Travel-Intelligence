@@ -255,14 +255,25 @@ function PlannerForm() {
 
       </div>
 
-      {/* Button */}
+      {/* Planning paths */}
 
-      <button
-        onClick={() => navigate("/assistant")}
-        className="mt-10 bg-cyan-500 hover:bg-cyan-600 px-8 py-3 rounded-xl text-white text-lg font-semibold transition"
->
-        Continue with AI
-      </button>
+      <div className="mt-10 flex flex-col sm:flex-row gap-4">
+        <button
+          type="button"
+          onClick={() => navigate("/assistant")}
+          className="flex-1 bg-cyan-500 hover:bg-cyan-600 px-8 py-3 rounded-xl text-white text-lg font-semibold transition"
+        >
+          Continue with AI
+        </button>
+
+        <button
+          type="button"
+          onClick={() => navigate("/planner")}
+          className="flex-1 bg-slate-700 hover:bg-slate-600 border border-slate-600 px-8 py-3 rounded-xl text-white text-lg font-semibold transition"
+        >
+          Plan a Trip
+        </button>
+      </div>
 
     </section>
   );

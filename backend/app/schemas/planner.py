@@ -2,6 +2,14 @@ from pydantic import BaseModel, Field, field_validator
 from typing import List
 
 
+SUPPORTED_TRANSPORTS = {
+    "bike": "Bike",
+    "car": "Car",
+    "public transport": "Public Transport",
+    "flight": "Flight",
+}
+
+
 class PlannerRequest(BaseModel):
     source: str
     destination: str
@@ -10,13 +18,21 @@ class PlannerRequest(BaseModel):
     transport: str
     interests: List[str] = Field(default_factory=list)
 
-    @field_validator("source", "destination", "transport")
+    @field_validator("source", "destination")
     @classmethod
     def require_text(cls, value: str):
         cleaned = value.strip()
         if not cleaned:
             raise ValueError("Field cannot be empty")
         return cleaned
+
+    @field_validator("transport")
+    @classmethod
+    def validate_transport(cls, value: str):
+        cleaned = value.strip().lower()
+        if cleaned not in SUPPORTED_TRANSPORTS:
+            raise ValueError("Unsupported transport mode")
+        return SUPPORTED_TRANSPORTS[cleaned]
 
     @field_validator("interests", mode="before")
     @classmethod
